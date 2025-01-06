@@ -1,6 +1,22 @@
 name: proxy
 
 services:
+  init-dhparams:
+    image: certbot/certbot
+    restart: "no"
+    entrypoint: /bin/sh
+    command: -c 'test -f /etc/letsencrypt/ssl-dhparams.pem || openssl dhparam -out /etc/letsencrypt/ssl-dhparams.pem 4096'
+    volumes:
+      - cert_volume:/etc/letsencrypt:Z
+  certbot-oneshot:
+    image: certbot/certbot
+    restart: "no"
+    entrypoint: /bin/sh
+    command: test -d /etc/letsencrypt/live/24contenthost.ru || certbot certonly --standalone --register-unsafely-without-email -d 24contenthost.ru, gallery.24contenthost.ru --rsa-key-size 2048 --agree-tos --force-renewal
+    ports:
+      - 80:80
+    volumes:
+      - cert_volume:/etc/letsencrypt:Z
   nginx:
     image: nginx:latest
     container_name: reverse-proxy
@@ -22,7 +38,7 @@ services:
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
-    command: certonly --webroot -w /var/www/certbot --force-renewal --email pttp79@yahoo.com  -d gallery.24contenthost.ru --agree-tos --non-interactive;
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email pttp79@yahoo.com -d 24contenthost.ru  -d gallery.24contenthost.ru --agree-tos --non-interactive;
 networks:
   content_host_network:
     external: true
