@@ -8,7 +8,14 @@ RUN apt-get update && \
 
 # Копируем конфигурации Nginx и веб-корень
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY ./webroot /var/www/certbot
+
+
+RUN mkdir -p /etc/letsencrypt/live /etc/letsencrypt/archive /etc/letsencrypt/renewal
+
+RUN mkdir -p /var/www/webroot
+
+RUN chown -R www-data:www-data /etc/letsencrypt /var/www/webroot && \
+    chmod -R 755 /etc/letsencrypt /var/www/webroot
 
 # Копируем скрипт старта
 COPY start.sh /start.sh

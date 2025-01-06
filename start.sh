@@ -1,17 +1,12 @@
 #!/bin/bash
 
-# Проверка наличия сертификатов
+# Проверяем, есть ли сертификаты
 if [ ! -f /etc/letsencrypt/live/gallery.24contenthost.ru/fullchain.pem ]; then
-  echo "Сертификаты не найдены. Запускаем Certbot для их получения..."
-  certbot certonly --webroot -w /var/www/certbot --email pttp79@yahoo.com --agree-tos --no-eff-email -d gallery.24contenthost.ru --non-interactive
+    # Если сертификатов нет, получаем их
+    echo "Сертификаты не найдены, выполняем запрос Certbot"
+    certbot certonly --webroot -w /var/www/webroot --email pttp79@yahoo.com --agree-tos --no-eff-email -d gallery.24contenthost.ru
 fi
 
-# Проверка, что сертификаты были получены
-if [ ! -f /etc/letsencrypt/live/gallery.24contenthost.ru/fullchain.pem ]; then
-  echo "Сертификаты не были созданы. Завершаем."
-  exit 1
-fi
-
-# Запуск Nginx
-echo "Запуск Nginx..."
+# Запускаем Nginx
+echo "Запускаем Nginx"
 nginx -g "daemon off;"
