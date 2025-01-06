@@ -1,44 +1,7 @@
-name: proxy
-
 services:
   nginx:
-    image: nginx:latest
-    container_name: reverse-proxy
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - /etc/ssl/certs:/etc/ssl/certs
-      - /etc/ssl/private:/etc/ssl/private
-      - ./letsencrypt:/etc/letsencrypt
-      - ./webroot:/var/www/certbot
-    networks:
-      - content_host_network
+    build: .
+    container_name: nginx-certbot
     ports:
       - "80:80"
       - "443:443"
-
-#  certbot:
-#    image: certbot/certbot
-#    container_name: certbot
-#    volumes:
-#      - serts:/etc/letsencrypt  # Сертификаты сохраняются здесь
-#      - ./certbot-logs:/var/log/letsencrypt  # Логи для диагностики
-#      - ./webroot:/var/www/certbot  # Webroot для сертификации
-#    entrypoint: /bin/sh -c '
-#      if [ ! -d "/etc/letsencrypt/live/gallery.24contenthost.ru" ]; then
-#      certbot certonly --webroot -w /var/www/certbot \
-#      --email pttp79@yahoo.com --agree-tos --no-eff-email \
-#      -d gallery.24contenthost.ru || exit 1;
-#      fi;
-#      trap exit TERM;
-#      while :; do sleep 6h & wait $${!};
-#      certbot renew --webroot -w /var/www/certbot;
-#      done'
-
-
-networks:
-  content_host_network:
-    external: true
-
-volumes:
-  serts:
-  webroot:
