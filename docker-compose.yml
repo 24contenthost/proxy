@@ -19,8 +19,8 @@ services:
     container_name: certbot
     volumes:
       - serts:/etc/letsencrypt  # Сертификаты сохраняются здесь
-      - webroot:/var/www/certbot  # Общая директория для webroot
       - ./certbot-logs:/var/log/letsencrypt  # Логи для диагностики
+      - ./webroot:/var/www/certbot  # Webroot для сертификации
     entrypoint: /bin/sh -c '
       if [ ! -d "/etc/letsencrypt/live/gallery.24contenthost.ru" ]; then
       certbot certonly --webroot -w /var/www/certbot \
@@ -31,6 +31,7 @@ services:
       while :; do sleep 6h & wait $${!};
       certbot renew --webroot -w /var/www/certbot;
       done'
+
 
 networks:
   content_host_network:
