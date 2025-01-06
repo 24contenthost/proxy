@@ -53,5 +53,5 @@ networks:
     external: true
 
 volumes:
-  cert_volume: {}
-  acme_challenge: {}
+  cert_volume:
+  acme_challenge:
