@@ -8,15 +8,15 @@ services:
     command: -c 'test -f /etc/letsencrypt/ssl-dhparams.pem || openssl dhparam -out /etc/letsencrypt/ssl-dhparams.pem 4096'
     volumes:
       - cert_volume:/etc/letsencrypt:Z
-certbot-oneshot:
-  image: certbot/certbot
-  restart: "no"
-  entrypoint: /bin/sh
-  command: /bin/sh -c 'test -d /etc/letsencrypt/live/24contenthost.ru || certbot certonly --standalone --register-unsafely-without-email -d 24contenthost.ru, gallery.24contenthost.ru --rsa-key-size 2048 --agree-tos --force-renewal'
-  ports:
-    - 80:80
-  volumes:
-    - cert_volume:/etc/letsencrypt:Z
+  certbot-oneshot:
+    image: certbot/certbot
+    restart: "no"
+    entrypoint: /bin/sh
+    command: /bin/sh -c 'test -d /etc/letsencrypt/live/24contenthost.ru || certbot certonly --standalone --register-unsafely-without-email -d 24contenthost.ru, gallery.24contenthost.ru --rsa-key-size 2048 --agree-tos --force-renewal'
+    ports:
+      - 80:80
+    volumes:
+      - cert_volume:/etc/letsencrypt:Z
 
   nginx:
     image: nginx
