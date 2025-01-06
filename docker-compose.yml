@@ -6,7 +6,8 @@ services:
     container_name: reverse-proxy
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./etc/ssl/certs:/etc/ssl/certs  # Монтируем только директорию с сертификатами
+      - /etc/ssl/certs:/etc/ssl/certs
+      - /etc/ssl/private:/etc/ssl/private
       - ./webroot:/var/www/certbot
     networks:
       - content_host_network
