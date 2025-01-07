@@ -1,4 +1,4 @@
-name: proxy
+version: "3.9"
 
 services:
   traefik:
@@ -9,12 +9,17 @@ services:
       - "--providers.docker=true"
       - "--providers.docker.network=content_host_network"
       - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.tlschallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.email=your-email@example.com"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
     ports:
       - "80:80"         # HTTP
-      - "8080:8080"     # Дашборд
+      - "443:443"       # HTTPS
+      - "8080:8080"     # Dashboard
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./traefik.yml:/etc/traefik/traefik.yml"
+      - "./letsencrypt:/letsencrypt"  # Для хранения сертификатов
     networks:
       - content_host_network
 
@@ -22,11 +27,12 @@ services:
     image: hashicorp/http-echo:0.2.3
     container_name: hello-world
     command:
-      - "-text=Hello World from Traefik!"
+      - "-text=Hello World from Traefik on HTTPS!"
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.hello-world.rule=Host(`gallery.24contenthost.ru`)"
-      - "traefik.http.routers.hello-world.entrypoints=web"
+      - "traefik.http.routers.hello-world.entrypoints=websecure"
+      - "traefik.http.routers.hello-world.tls.certresolver=letsencrypt"
     networks:
       - content_host_network
 
