@@ -5,7 +5,7 @@ services:
     image: docker.io/certbot/certbot
     restart: "no"
     entrypoint: /bin/sh
-    command: -c 'test -d /etc/letsencrypt/live/${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru} || certbot certonly --webroot --webroot-path /usr/share/nginx/acme-challenge --email=pttp79@yahoo.com -d "${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru},${BASE_DOMAIN:-24contenthost.ru}" --rsa-key-size ${rsa_key_size:-2048} --agree-tos --force-renewal'
+    command: -c 'test -d /etc/letsencrypt/live/${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru} || certbot certonly --webroot --webroot-path /usr/share/nginx/html/acme-challenge --email=pttp79@yahoo.com -d "${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru},${BASE_DOMAIN:-24contenthost.ru}" --rsa-key-size ${rsa_key_size:-2048} --agree-tos --force-renewal'
     volumes:
       - cert_volume:/etc/letsencrypt
       - acme_challenge:/usr/share/nginx/html/acme-challenge
