@@ -26,18 +26,6 @@ services:
     networks:
       - content_host_network
 
-  hello-world:
-    image: hashicorp/http-echo:0.2.3
-    container_name: hello-world
-    command:
-      - "-text=Hello World from Traefik on HTTPS!"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.hello-world.rule=Host(`gallery.24contenthost.ru`)"
-      - "traefik.http.routers.hello-world.entrypoints=websecure"
-      - "traefik.http.routers.hello-world.tls.certresolver=letsencrypt"
-    networks:
-      - content_host_network
 
 networks:
   content_host_network:
