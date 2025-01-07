@@ -19,10 +19,6 @@ services:
     ports:
       - 80:80
       - 443:443
-    depends_on:
-      certbot-oneshot:
-        condition: service_completed_successfully
-        required: true
     volumes:
       - cert_volume:/etc/letsencrypt:Z
       - acme_challenge:/usr/share/nginx/html/.well-known:Z
