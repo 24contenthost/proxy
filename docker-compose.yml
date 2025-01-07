@@ -6,8 +6,6 @@ services:
     restart: "no"
     entrypoint: /bin/sh
     command: -c 'test -d /etc/letsencrypt/live/${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru} || certbot certonly --webroot --webroot-path /usr/share/nginx/html --email=pttp79@yahoo.com -d "${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru},${BASE_DOMAIN:-24contenthost.ru}" --rsa-key-size ${rsa_key_size:-2048} --agree-tos --force-renewal'
-    ports:
-      - 80:80
     volumes:
       - cert_volume:/etc/letsencrypt:Z
       - acme_challenge:/usr/share/nginx/html/.well-known:Z
@@ -22,26 +20,6 @@ services:
     volumes:
       - cert_volume:/etc/letsencrypt:Z
       - acme_challenge:/usr/share/nginx/html/.well-known:Z
-
-#  nginx:
-#    image: nginx
-#    entrypoint: /bin/sh
-#    command: -c 'while :; do sleep 6h && wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'
-#    # deploy:
-#    #   replicas: 2
-#    ports:
-#      - 80:80
-#      - 443:443
-#    depends_on:
-#      init-dhparams:
-#        condition: service_completed_successfully
-#        required: true
-#      #certbot-oneshot:
-#      #  condition: service_completed_successfully
-#      #  required: true
-#    volumes:
-#      - ./cert_volume:/etc/letsencrypt:Z
-#      #- acme_challenge:/usr/share/nginx/html/.well-known:Z
 
 networks:
   content_host_network:
