@@ -1,52 +1,36 @@
 name: proxy
 
 services:
-  init-dhparams:
-    image: certbot/certbot
+  certbot-oneshot:
+    image: docker.io/certbot/certbot
     restart: "no"
     entrypoint: /bin/sh
-    command: -c 'test -f /etc/letsencrypt/ssl-dhparams.pem || openssl dhparam -out /etc/letsencrypt/ssl-dhparams.pem 4096'
-    volumes:
-      - cert_volume:/etc/letsencrypt:Z
-  certbot-oneshot:
-    image: certbot/certbot
-    restart: "no"
-    entrypoint: ["/bin/sh", "-c", "test -d /etc/letsencrypt/live/gallery.24contenthost.ru || certbot certonly --standalone --register-unsafely-without-email -d 24contenthost.ru,gallery.24contenthost.ru --rsa-key-size 2048 --agree-tos --force-renewal"]
+    command: -c 'test -d /etc/letsencrypt/live/${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru} || certbot certonly --standalone --register-unsafely-without-email -d "${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru},${BASE_DOMAIN:-24contenthost.ru}" --rsa-key-size ${rsa_key_size:-2048} --agree-tos --force-renewal'
     ports:
       - 80:80
     volumes:
       - cert_volume:/etc/letsencrypt:Z
 
-  nginx:
-    image: nginx
-    entrypoint: /bin/sh
-    command: -c 'while :; do sleep 6h && wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'
-    # deploy:
-    #   replicas: 2
-    ports:
-      - 80:80
-      - 443:443
-    depends_on:
-      init-dhparams:
-        condition: service_completed_successfully
-        required: true
-      certbot-oneshot:
-        condition: service_completed_successfully
-        required: true
-    volumes:
-      - cert_volume:/etc/letsencrypt:Z
-      - acme_challenge:/usr/share/nginx/html/.well-known:Z
-  certbot:
-    image: certbot/certbot
-    entrypoint: /bin/sh
-    command: -c 'trap exit TERM; while :; do certbot renew; sleep 24h && wait $${!}; done;'
-    depends_on:
-      nginx:
-        condition: service_started
-        required: true
-    volumes:
-      - cert_volume:/etc/letsencrypt:Z
-      - acme_challenge:/usr/share/nginx/html/.well-known:Z
+#  nginx:
+#    image: nginx
+#    entrypoint: /bin/sh
+#    command: -c 'while :; do sleep 6h && wait $${!}; nginx -s reload; done & nginx -g "daemon off;"'
+#    # deploy:
+#    #   replicas: 2
+#    ports:
+#      - 80:80
+#      - 443:443
+#    depends_on:
+#      init-dhparams:
+#        condition: service_completed_successfully
+#        required: true
+#      #certbot-oneshot:
+#      #  condition: service_completed_successfully
+#      #  required: true
+#    volumes:
+#      - ./cert_volume:/etc/letsencrypt:Z
+#      #- acme_challenge:/usr/share/nginx/html/.well-known:Z
+
 networks:
   content_host_network:
     external: true
