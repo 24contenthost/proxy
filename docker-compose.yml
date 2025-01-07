@@ -28,25 +28,25 @@ networks:
 volumes:
   cert_volume:
   acme_challenge:
+
 configs:
-  configs:
-    nginx-defaultserver:
-      content: |
-        server {
-          listen 80;
+  nginx-defaultserver:
+    content: |
+      server {
+        listen 80;
 
-          server_name ${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru} ${BASE_DOMAIN:-24contenthost.ru};
-          charset utf-8;
+        server_name ${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru} ${BASE_DOMAIN:-24contenthost.ru};
+        charset utf-8;
 
-          root /usr/share/nginx/html;
-          index index.html index.htm;
+        root /usr/share/nginx/html;
+        index index.html index.htm;
 
-          location / {
-            try_files $uri /index.html;
-          }
-
-          location /.well-known/acme-challenge/ {
-            root /usr/share/nginx/html;
-            try_files $uri =404;
-          }
+        location / {
+          try_files $uri /index.html;
         }
+
+        location /.well-known/acme-challenge/ {
+          root /usr/share/nginx/html;
+          try_files $uri =404;
+        }
+      }
