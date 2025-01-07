@@ -1,31 +1,35 @@
 name: proxy
 
 services:
-  certbot-oneshot:
-    image: docker.io/certbot/certbot
-    restart: "no"
-    entrypoint: /bin/sh
-    command: -c 'test -d /etc/letsencrypt/live/${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru} || certbot certonly --webroot --staging --webroot-path /usr/share/nginx/html/acme-challenge --email=pttp79@yahoo.com -d "${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru},${BASE_DOMAIN:-24contenthost.ru}" --rsa-key-size ${rsa_key_size:-2048} --agree-tos --force-renewal'
-    volumes:
-      - cert_volume:/etc/letsencrypt
-      - ./acme-challenge:/usr/share/nginx/html/acme-challenge
-
-  nginx:
-    image: nginx:latest
+  traefik:
+    image: traefik:v3.0
+    container_name: traefik
+    command:
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--providers.docker.network=content_host_network"
+      - "--entrypoints.web.address=:80"
     ports:
-      - 80:80
-      - 443:443
+      - "80:80"         # HTTP
+      - "8080:8080"     # Дашборд
     volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - cert_volume:/etc/letsencrypt
-      - ./acme-challenge:/usr/share/nginx/html/acme-challenge
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./traefik.yml:/etc/traefik/traefik.yml"
+    networks:
+      - content_host_network
+
+  hello-world:
+    image: hashicorp/http-echo:0.2.3
+    container_name: hello-world
+    command:
+      - "-text=Hello World from Traefik!"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.hello-world.rule=Host(`gallery.24contnenthost.ru`)"
+      - "traefik.http.routers.hello-world.entrypoints=web"
     networks:
       - content_host_network
 
 networks:
   content_host_network:
     external: true
-
-volumes:
-  cert_volume:
-  acme_challenge:
