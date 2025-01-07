@@ -10,6 +10,21 @@ services:
       - 80:80
     volumes:
       - cert_volume:/etc/letsencrypt:Z
+  nginx:
+    image: nginx:latest
+    configs:
+      - source: nginx-defaultserver
+        target: /etc/nginx/conf.d/default.conf
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      certbot-oneshot:
+        condition: service_completed_successfully
+        required: true
+    volumes:
+      - cert_volume:/etc/letsencrypt:Z
+      #- acme_challenge:/usr/share/nginx/html/.well-known:Z
 
 #  nginx:
 #    image: nginx
@@ -37,4 +52,28 @@ networks:
 
 volumes:
   cert_volume:
-  acme_challenge:
+  #acme_challenge:
+
+configs:
+  nginx-defaultserver:
+    content: |
+
+      server {
+        listen 80;
+
+        server_name _ default_server;
+        charset utf-8;
+
+        # max upload size
+        client_max_body_size 10M;
+
+        root /usr/share/nginx/html;
+        index index.html index.htm;
+
+        location / {
+          root /usr/share/nginx/html;
+          try_files $uri $uri/ /index.html =502;
+        }
+
+      }
+
