@@ -61,18 +61,20 @@ configs:
 
       server {
         listen 80;
-
-        server_name _ default_server;
+    
+        server_name ${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru} ${BASE_DOMAIN:-24contenthost.ru};
         charset utf-8;
-
-
+    
         root /usr/share/nginx/html;
         index index.html index.htm;
-
+    
         location / {
-          root /usr/share/nginx/html;
-          try_files $uri $uri/ /index.html =502;
-        }
-
+        try_files $uri $uri/ /index.html =404;
       }
+    
+        location /.well-known/acme-challenge/ {
+        root /usr/share/nginx/html;
+        try_files $uri =404;
+      }
+    }
 
