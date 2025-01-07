@@ -5,21 +5,22 @@ services:
     image: docker.io/certbot/certbot
     restart: "no"
     entrypoint: /bin/sh
-    command: -c 'test -d /etc/letsencrypt/live/${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru} || certbot certonly --webroot --webroot-path /usr/share/nginx/html --email=pttp79@yahoo.com -d "${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru},${BASE_DOMAIN:-24contenthost.ru}" --rsa-key-size ${rsa_key_size:-2048} --agree-tos --force-renewal'
+    command: -c 'test -d /etc/letsencrypt/live/${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru} || certbot certonly --webroot --webroot-path /usr/share/nginx/acme-challenge --email=pttp79@yahoo.com -d "${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru},${BASE_DOMAIN:-24contenthost.ru}" --rsa-key-size ${rsa_key_size:-2048} --agree-tos --force-renewal'
     volumes:
       - cert_volume:/etc/letsencrypt:Z
-      - acme_challenge:/usr/share/nginx/html/.well-known:Z
+      - acme_challenge:/usr/share/nginx/acme-challenge:Z
+
   nginx:
     image: nginx:latest
-    configs:
-      - source: nginx-defaultserver
-        target: /etc/nginx/conf.d/default.conf
     ports:
       - 80:80
       - 443:443
     volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
       - cert_volume:/etc/letsencrypt:Z
-      - acme_challenge:/usr/share/nginx/html/.well-known:Z
+      - acme_challenge:/usr/share/nginx/acme-challenge:Z
+    networks:
+      - content_host_network
 
 networks:
   content_host_network:
@@ -28,23 +29,3 @@ networks:
 volumes:
   cert_volume:
   acme_challenge:
-
-configs:
-  nginx-defaultserver:
-    content: |
-      server {
-        listen 80;
-        server_name ${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru};
-      
-        root /usr/share/nginx/html;
-        index index.html index.htm;
-      
-        location / {
-          try_files $uri /index.html;
-        }
-      
-        location /.well-known/acme-challenge/ {
-          root /usr/share/nginx/html;
-          try_files $uri =404;
-        }
-      }
