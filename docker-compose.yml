@@ -5,11 +5,12 @@ services:
     image: docker.io/certbot/certbot
     restart: "no"
     entrypoint: /bin/sh
-    command: -c 'test -d /etc/letsencrypt/live/${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru} || certbot certonly --standalone --dry-run --debug-challenges -v --email=pttp79@yahoo.com -d "${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru},${BASE_DOMAIN:-24contenthost.ru}" --rsa-key-size ${rsa_key_size:-2048} --agree-tos --force-renewal'
+    command: -c 'test -d /etc/letsencrypt/live/${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru} || certbot certonly --webroot --webroot-path /usr/share/nginx/html --email=pttp79@yahoo.com -d "${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru},${BASE_DOMAIN:-24contenthost.ru}" --rsa-key-size ${rsa_key_size:-2048} --agree-tos --force-renewal'
     ports:
       - 80:80
     volumes:
       - cert_volume:/etc/letsencrypt:Z
+      - acme_challenge:/usr/share/nginx/html/.well-known:Z
   nginx:
     image: nginx:latest
     configs:
@@ -24,7 +25,7 @@ services:
         required: true
     volumes:
       - cert_volume:/etc/letsencrypt:Z
-      #- acme_challenge:/usr/share/nginx/html/.well-known:Z
+      - acme_challenge:/usr/share/nginx/html/.well-known:Z
 
 #  nginx:
 #    image: nginx
@@ -64,8 +65,6 @@ configs:
         server_name _ default_server;
         charset utf-8;
 
-        # max upload size
-        client_max_body_size 10M;
 
         root /usr/share/nginx/html;
         index index.html index.htm;
