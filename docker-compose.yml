@@ -34,17 +34,15 @@ configs:
     content: |
       server {
         listen 80;
-
-        server_name ${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru} ${BASE_DOMAIN:-24contenthost.ru};
-        charset utf-8;
-
+        server_name ${STAND:-gallery}.${BASE_DOMAIN:-24contenthost.ru};
+      
         root /usr/share/nginx/html;
         index index.html index.htm;
-
+      
         location / {
           try_files $uri /index.html;
         }
-
+      
         location /.well-known/acme-challenge/ {
           root /usr/share/nginx/html;
           try_files $uri =404;
