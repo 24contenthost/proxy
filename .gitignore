@@ -1,1 +1,4 @@
 .idea
+letsencrypt/acme.json
+letsencrypt
+.DS_Store
