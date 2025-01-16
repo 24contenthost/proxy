@@ -20,7 +20,7 @@ jobs:
           
           echo "Stopping and removing old containers..."
           docker-compose down --volumes --remove-orphans
-          sleep 2
+          sleep 3
           
           echo "Starting containers..."
           docker-compose up -d
