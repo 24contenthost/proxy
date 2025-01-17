@@ -23,12 +23,9 @@ jobs:
         run: |
           export COMPOSE_PROJECT_NAME=infra
           
-          echo "Stopping and removing old containers..."
-          docker-compose down --remove-orphans
-          sleep 3
-          
-          echo "Starting containers..."
-          docker-compose up -d
+          docker-compose -f ./.deploy/docker-compose.yml pull
+          docker-compose -f ./.deploy/docker-compose.yml down --remove-orphans || echo "No containers to remove"
+          docker-compose -f ./.deploy/docker-compose.yml up -d
           
           # Wait for MySQL container to be ready (example with a simple check)
           echo "Waiting for MySQL to become available..."
