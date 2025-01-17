@@ -1,9 +1,6 @@
-name: Start Traefik Service
+name: Start Infra (Proxy + Database) Service
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
@@ -13,16 +10,31 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .deploy/docker-compose.yml
 
       - name: Deploy application using Docker Compose
+        env:
+          COMPOSE_PROJECT_NAME: infra
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
         run: |
-          export COMPOSE_PROJECT_NAME=proxy
+          export COMPOSE_PROJECT_NAME=infra
           
           echo "Stopping and removing old containers..."
-          docker-compose down --volumes --remove-orphans
+          docker-compose down --remove-orphans
           sleep 3
           
-          #echo "Starting containers..."
-          #docker-compose up -d
+          echo "Starting containers..."
+          docker-compose up -d
           
+          # Wait for MySQL container to be ready (example with a simple check)
+          echo "Waiting for MySQL to become available..."
+          until docker exec mysql mysqladmin --user=root --password="${{ secrets.MYSQL_ROOT_PASSWORD }}" --host="localhost" ping --silent; do
+            echo "Waiting for MySQL to be ready..."
+            sleep 5
+          done
+
           echo "Deployment completed successfully!"
