@@ -13,6 +13,7 @@ jobs:
         with:
           sparse-checkout: |
             .deploy/docker-compose.yml
+            ./letsencrypt
 
       - name: Deploy application using Docker Compose
         env:
