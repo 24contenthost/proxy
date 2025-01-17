@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: [self-hosted, proxy]
+    runs-on: [self-hosted, infra]
 
     steps:
       - name: Checkout repository
@@ -22,7 +22,7 @@ jobs:
           docker-compose down --volumes --remove-orphans
           sleep 3
           
-          echo "Starting containers..."
-          docker-compose up -d
+          #echo "Starting containers..."
+          #docker-compose up -d
           
           echo "Deployment completed successfully!"
