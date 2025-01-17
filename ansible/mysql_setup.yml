@@ -1,0 +1,47 @@
+- name: Deploy MySQL with Docker
+  hosts: all
+  become: yes
+  vars:
+    mysql_root_password: "{{ lookup('env', 'MYSQL_ROOT_PASSWORD') }}"  # Получаем пароль рута из окружения (секретов)
+    mysql_user: "{{ lookup('env', 'MYSQL_USER') }}"  # Получаем имя пользователя из окружения (секретов)
+    mysql_password: "{{ lookup('env', 'MYSQL_PASSWORD') }}"  # Получаем пароль пользователя из окружения (секретов)
+    mysql_databases:  # Базы данных, которые вы хотите создать вручную
+      - gallery
+      - project2
+
+  tasks:
+    - name: Ensure MySQL container is present
+      docker_container:
+        name: mysql
+        image: mysql:8.0
+        state: started
+        restart_policy: always
+        env:
+          MYSQL_ROOT_PASSWORD: "{{ mysql_root_password }}"
+          MYSQL_USER: "{{ mysql_user }}"
+          MYSQL_PASSWORD: "{{ mysql_password }}"
+        volumes:
+          - mysql_data:/var/lib/mysql
+        networks:
+          - content_host_network
+
+    - name: Create MySQL databases manually (if not exists)
+      docker_container_exec:
+        container: mysql
+        command: "mysql -u root -p{{ mysql_root_password }} -e 'CREATE DATABASE IF NOT EXISTS {{ item }};'"
+      loop: "{{ mysql_databases }}"  # Используем loop для обработки базы данных
+      when: mysql_databases is defined
+
+    - name: Grant privileges to MySQL user for each manually defined database
+      docker_container_exec:
+        container: mysql
+        command: "mysql -u root -p{{ mysql_root_password }} -e 'GRANT ALL PRIVILEGES ON {{ item }}.* TO \"{{ mysql_user }}\"@\"%\";'"
+      loop: "{{ mysql_databases }}"  # Используем loop для обработки базы данных
+      when: mysql_databases is defined
+
+volumes:
+  mysql_data:
+
+networks:
+  content_host_network:
+    external: true

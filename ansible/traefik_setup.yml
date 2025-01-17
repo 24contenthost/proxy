@@ -1,0 +1,42 @@
+- name: Deploy Traefik with Docker
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Ensure Traefik container is present and running
+      docker_container:
+        name: "traefik"
+        image: "traefik:v3.3.1"
+        state: started
+        restart_policy: always
+        command:
+          - "--log.level=INFO"
+          - "--api.insecure=true"
+          - "--api.dashboard=true"
+          - "--providers.docker=true"
+          - "--providers.docker.network=content_host_network"  # Жестко указана сеть
+          - "--providers.docker.exposedByDefault=false"
+          - "--entrypoints.web.address=:80"
+          - "--entrypoints.websecure.address=:443"
+          - "--entrypoints.websecure.http.tls.certResolver=letsencrypt"
+          - "--certificatesresolvers.letsencrypt.acme.email=pttp79@yahoo.com"  # Указан email для сертификатов ACME
+          - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+          - "--certificatesresolvers.letsencrypt.acme.tlsChallenge=true"
+          - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+          - "--entryPoints.web.http.redirections.entrypoint.scheme=https"
+        ports:
+          - "80:80"         # HTTP
+          - "443:443"       # HTTPS
+          - "8080:8080"     # Dashboard
+        volumes:
+          - "/var/run/docker.sock:/var/run/docker.sock:ro"
+          - "letsencrypt:/letsencrypt"  # Для хранения сертификатов
+        networks:
+          - content_host_network  # Жестко указана сеть
+
+  volumes:
+    letsencrypt:
+
+  networks:
+    content_host_network:
+      external: true

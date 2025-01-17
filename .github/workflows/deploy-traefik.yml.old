@@ -1,0 +1,25 @@
+name: Deploy Traefik with Ansible
+
+on:
+  workflow_dispatch:  # Этот workflow можно запускать вручную
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4  # Клонируем репозиторий
+
+      - name: Install Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible  # Устанавливаем Ansible
+
+      - name: Run Traefik deployment playbook
+        run: |
+          ansible-playbook ansible/traefik_deploy.yml  # Путь к вашему плейбуку
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}  # Пример использования секретов для MySQL (если нужно)
+          MYSQL_USER: ${{ secrets.MYSQL_USER }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
