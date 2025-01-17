@@ -33,5 +33,9 @@ jobs:
             echo "Waiting for MySQL to be ready..."
             sleep 5
           done
+          
+          # Create databases and assign privileges using dynamic user and password
+          docker exec mysql bash -c "echo \"CREATE DATABASE IF NOT EXISTS ${MYSQL_USER}_database; GRANT ALL PRIVILEGES ON ${MYSQL_USER}_database.* TO '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}'; FLUSH PRIVILEGES;\" | mysql -u root -p${{ secrets.MYSQL_ROOT_PASSWORD }}"
+
 
           echo "Deployment completed successfully!"
