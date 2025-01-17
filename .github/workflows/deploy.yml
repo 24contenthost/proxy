@@ -13,7 +13,6 @@ jobs:
         with:
           sparse-checkout: |
             .deploy/docker-compose.yml
-           
 
       - name: Deploy application using Docker Compose
         env:
@@ -36,7 +35,6 @@ jobs:
           done
           
           # Create the database and user, grant privileges using dynamic user and password
-           docker exec mysql --user=root --password="${{ secrets.MYSQL_ROOT_PASSWORD }}" bash -c "echo \"CREATE DATABASE IF NOT EXISTS ${MYSQL_USER}_database; GRANT ALL PRIVILEGES ON ${MYSQL_USER}_database.* TO '${MYSQL_USER}'@'%'; FLUSH PRIVILEGES;\" | mysql -u root -p${{ secrets.MYSQL_ROOT_PASSWORD }}"
-    
-    
+          docker exec mysql mysql -u root -p"${{ secrets.MYSQL_ROOT_PASSWORD }}" -e "CREATE DATABASE IF NOT EXISTS ${MYSQL_USER}_database; GRANT ALL PRIVILEGES ON ${MYSQL_USER}_database.* TO '${MYSQL_USER}'@'%'; FLUSH PRIVILEGES;"
+
           echo "Deployment completed successfully!"
