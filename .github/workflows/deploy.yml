@@ -10,10 +10,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          sparse-checkout: |
-            .deploy/docker-compose.yml
-            ./letsencrypt
+        #with:
+         # sparse-checkout: |
+          #  .deploy/docker-compose.yml
+           # ./letsencrypt
 
       - name: Deploy application using Docker Compose
         env:
